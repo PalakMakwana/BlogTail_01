@@ -1,41 +1,25 @@
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+// Megamenu.js
+
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, db } from "./Firebase1";
 import { v4 } from "uuid";
 import Nav from "./Nav";
 import { imagedb } from "./Firebase1";
-// import { UilMultiply } from "@iconscout/react-unicons";
-// import { UilEstate } from "@iconscout/react-unicons";
-// import { UilBlogger } from "@iconscout/react-unicons";
+import { addDoc, collection } from "firebase/firestore";
 
 function Megamenu() {
-  const location = useLocation();
   const [imageUrl, setImageUrl] = useState("");
   const [value, setValue] = useState({
-    category: "",
+    category: "", // Initially empty
     title: "",
     author: "",
     date: "",
     description: "",
   });
-  const navigate = useNavigate("");
+  const navigate = useNavigate();
 
-  
-  useEffect(() => {
-    if (location.state && location.state.postToEdit) {
-      const postToEdit = location.state.postToEdit;
-      setValue({
-        category: postToEdit.category,
-        title: postToEdit.title,
-        author: postToEdit.author,
-        date: postToEdit.date,
-        description: postToEdit.description,
-      });
-      setImageUrl(postToEdit.image);
-    }
-  }, [location.state]);
   useEffect(() => {
     const loged_in = localStorage.getItem("loggedin");
     if (loged_in == null) {
@@ -43,16 +27,13 @@ function Megamenu() {
     }
   }, []);
 
-
-
- 
   const addblog = async (e) => {
     e.preventDefault();
     if (!imageUrl) {
       alert("Please upload an image");
       return;
     }
-  
+
     try {
       const user = await auth.currentUser;
       if (user) {
@@ -65,29 +46,18 @@ function Megamenu() {
           description: value.description,
           uid: user.uid,
         };
-  
-        if (location.state && location.state.postToEdit) {
-          // If editing existing post
-          const postId = location.state.postToEdit.id;
-          const postRef = doc(db, "AddBlog", postId);
-          await updateDoc(postRef, data);
-        } else {
-          // If adding new post
-          const docRef = await addDoc(collection(db, "AddBlog"), data);
-          console.log("Document written with ID:", docRef.id);
-        }
-        
+
+        const docRef = await addDoc(collection(db, "AddBlog"), data);
+        console.log("Document written with ID:", docRef.id);
+
         navigate("/dashboard");
-        alert("Blog post updated successfully");
-      } else {
-        navigate("/");
+        alert("Blog post added successfully");
       }
     } catch (error) {
-      console.error("Error adding/updating document:", error);
-      alert("Failed to update blog post");
+      console.error("Error adding document:", error);
+      alert("Failed to add blog post");
     }
   };
-  
 
   const handleuploadImage = (e) => {
     const file = e.target.files[0];
@@ -104,54 +74,33 @@ function Megamenu() {
       });
     }
   };
-  const categories = ["Food", "Travel", "Tech"];
+
   return (
     <div className="bg-[#40679E] min-h-screen">
       <Nav />
       <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-3">
-        {/* <button
-          className="text-white hover:text-gray-100"
-          onClick={() => navigate("/dashboard")}
-        > */}
-          {/* <UilEstate className="w-16 h-16" /> */}
-        {/* </button> */}
         <div className="mt-0">
           <h1 className="text-3xl font-bold mb-4 text-gray-800">Add Blog</h1>
           <form className="space-y-4" onSubmit={addblog}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="category" className="text-xl text-gray-900 mr-10">
-                  Add Category
+                  Select Category
                 </label>
                 <select
-            id="category"
-            name="category"
-            className="input-field border border-gray-300 rounded-md p-2"
-            value={value.category}
-            onChange={(e) =>
-              setValue({ ...value, category: e.target.value })
-            }
-          >
-            <option value="">Select Category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-
-{/*                 
-                <input
-                  type="text"
                   id="category"
                   name="category"
                   className="input-field border border-gray-300 rounded-md p-2"
-                  placeholder="Category"
                   value={value.category}
                   onChange={(e) =>
                     setValue({ ...value, category: e.target.value })
                   }
-                /> */}
+                >
+                  <option value="">Select Category</option>
+                  <option value="food">Food</option>
+                  <option value="travel">Travel</option>
+                  <option value="tech">Tech</option>
+                </select>
               </div>
               <div>
                 <label htmlFor="title" className="text-xl text-gray-900 mr-5">
@@ -170,7 +119,7 @@ function Megamenu() {
                 />
               </div>
             </div>
-           
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="author" className="text-xl text-gray-900">

@@ -42,7 +42,7 @@ function Nav() {
 <div className="ml-10 mt-2  flex space-x-12">
                             <button className="text-white" onClick={() => navigate('/dashboard')}>My post</button>
                             <button className="text-white" onClick={() => navigate('/home')}>Home</button>
-                            <button className="text-white" onClick={() => navigate('/megamenu')}>Add Blog</button>
+                            
                            
                         </div>
 <button className="text-white mt-2" onClick={handleLogout}>Logout</button>

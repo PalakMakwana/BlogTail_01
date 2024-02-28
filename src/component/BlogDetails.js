@@ -108,7 +108,7 @@ function BlogDetail() {
         <p className='mb-2 font-semibold'>Title: {blogData.title}</p>
         <p className='mb-2 mt-5 font-bold text-lg'>{displayedDescription}</p>
         {readMoreButton}
-        <p className='mb-2 mt-4 font-md'>Author: {blogData.author}</p>
+        {/* <p className='mb-2 mt-4 font-md'>Author: {blogData.author}</p> */}
         <p className='mb-2 font-md'>Date: {blogData.date}</p>
       </div>
     </div>

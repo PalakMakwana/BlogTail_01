@@ -1,38 +1,89 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import * as React from 'react';
+import { styled } from '@mui/material/styles';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardMedia from '@mui/material/CardMedia';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
 
-const BlogCard = ({ category, title, author, date, image, handleDelete,handleEdit, showDeleteButton , showEditButton }) => {
-  const navigate = useNavigate();
+import Avatar from '@mui/material/Avatar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import { red } from '@mui/material/colors';
 
+
+
+const BlogCardContainer = styled(Card)(({ theme }) => ({
+  maxWidth: 345,
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const ExpandMore = styled((props) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+  marginLeft: 'auto',
+  transition: theme.transitions.create('transform', {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
+
+
+const Blogcard = ({ category, title, date, image, handleDelete, handleEdit, showDeleteButton, showEditButton }) => {
+  
+  const [expanded, setExpanded] = React.useState(false);
+  
+  const handleExpandClick=()=>{
+    setExpanded(!expanded);
+  };
+  console.log(handleEdit, "a")
 
   return (
-    <div>
-      <div className="w-full xl:w-full ml-2 h-20 p-3  border-gray-500">
-        <div className="bg-[#fbfcff] rounded-xl shadow-lg overflow-hidden">
-          <div className="h-[50%]  w-[100%] object-cover "><img className="h-60 w-[100%] " src={image} alt="" /></div>
-          <p className="w-[92%] ml-3 text-center font-semibold pl-2 mt-2 justify-center space-x-5  rounded-lg  bg-[#9b9eeb]">
-            {category}
-          </p>
-          <p className="text-gray-900 start-0 text-lg font-bold mt-3 ml-1 flex leading-tight mr-6 mb-2">
-            {title}
-          </p>
-          <div className="flex">
-            <p className="mt-2 ml-2 font-semibold font-sans  truncate text-ellipsis overflow-hidden">{author}</p>
-          </div>
-          <div className="flex">
-            <p className="mt-1 ml-2 mb-4 font-thin font-sans text-xs">{date}</p>
-           
-            {showDeleteButton && <button className='ml-3 mb-2 bg-red-400 text-black text-base font-medium w-[20%] rounded-full' onClick={handleDelete}>Delete</button>}
-            {/* {showDeleteButton && <button className='ml-3 mb-2 bg-blue-400 text-black text-base font-medium w-[20%] rounded-full' onClick={handleEdit}>Edit</button>} */}
-            {showEditButton && (<button  className='ml-3 mb-2 bg-blue-400 text-black text-base font-medium w-[20%] rounded-full' onClick={handleEdit} >
-    Edit
-  </button>
-)}
-</div>
-        </div>
-      </div>
-    </div>
+    <BlogCardContainer  sx={{  borderRadius: '13px' }} >
+      <CardHeader
+        avatar={
+          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+            R
+          </Avatar>
+        }
+        title={title}
+        subheader={date}
+      />
+      <CardMedia
+        component="img"
+        height="194"
+        image={image}
+        alt={title}
+      />
+      <CardContent>
+        <Typography variant="body2" color="text.secondary">
+          {category}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {date}
+        </Typography>
+      </CardContent>
+      <CardActions disableSpacing>
+       
+
+        <ExpandMore
+          expand={expanded}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          
+        </ExpandMore>
+      </CardActions>
+     
+    </BlogCardContainer>
   );
 };
 
-export default BlogCard;
+export default Blogcard;

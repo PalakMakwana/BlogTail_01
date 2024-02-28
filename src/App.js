@@ -8,7 +8,7 @@ import Megamenu from "./component/Megamenu";
 import Nav from "./component/Nav";
 import BlogDetails from "./component/BlogDetails";
 import Home from "./component/Home";
-import Account from "./component/Account";
+
 
 
 function App() {

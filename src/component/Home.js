@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import BlogCard from './Blogcard';
-import { collection,getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "./Firebase1";
 import { signOut } from 'firebase/auth';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,7 @@ function Home() {
   const [getData, setGetData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(4);
+  const [select, setSelect] = useState("");
 
   const navigate = useNavigate();
 
@@ -21,6 +22,34 @@ function Home() {
 //     await deleteDoc(deletedb);
 //   };
 
+
+useEffect(() => {
+  const fetchdata = async () => {
+    let querySnapshot;
+    if (select !== "") { // Check if select state is not empty
+      querySnapshot = await getDocs(
+        query(collection(db, "AddBlog"), where("category", "==", select))
+      );
+    } else {
+      querySnapshot = await getDocs(collection(db, "AddBlog"));
+    }
+    const blogs = [];
+
+    for (const doc of querySnapshot.docs) {
+      const blogData = doc.data();
+      const userDoc = await getDoc(doc.ref);
+      const userName = userDoc.exists() ? userDoc.data().displayName : "Unknown Author";
+      blogs.push({ ...blogData, id: doc.id, author: userName });
+    }
+
+    setGetData(blogs);
+  };
+
+  fetchdata();
+}, [select]);
+
+
+
   useEffect(() => {
     const loged_in = localStorage.getItem("loggedin")
     if(loged_in == null){
@@ -28,25 +57,17 @@ function Home() {
     }
   },[]);
 
-  useEffect(() => {
-    const fetchdata = async () => {
-      const dbref = collection(db, "AddBlog");
-      const retrieve = await getDocs(dbref);
-      setGetData(retrieve.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    };
-    fetchdata();
-  }, []);
-
-  // const handleLogout = () => {
-  //   signOut(auth)
-  //     .then(() => {
-  //       localStorage.removeItem('loggedin');
-  //       navigate('/');
-  //     })
-  //     .catch((error) => {
-  //       console.log('Error during logout:', error.message);
-  //     });
-  // };
+ 
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        localStorage.removeItem('loggedin');
+        navigate('/');
+      })
+      .catch((error) => {
+        console.log('Error during logout:', error.message);
+      });
+  };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -73,7 +94,7 @@ function Home() {
     }
     return pagination;
   };
-  const [select, setSelect] = useState("");
+
   return (
     <>
      <Nav />
