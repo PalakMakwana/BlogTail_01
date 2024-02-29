@@ -5,83 +5,67 @@ import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
-
-import Avatar from '@mui/material/Avatar';
+import { useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-
-
+import EditIcon from '@mui/icons-material/Edit'; 
 
 const BlogCardContainer = styled(Card)(({ theme }) => ({
-  maxWidth: 345,
-  height: '100%',
+  width: 300, 
+  minHeight: 400, 
   display: 'flex',
   flexDirection: 'column',
 }));
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
+
+const Blogcard = ({ category,username,date, title, image, handleEdit, showEditButton }) => {
+ 
+
+ 
 
 
-const Blogcard = ({ category, title, date, image, handleDelete, handleEdit, showDeleteButton, showEditButton }) => {
-  
-  const [expanded, setExpanded] = React.useState(false);
-  
-  const handleExpandClick=()=>{
-    setExpanded(!expanded);
-  };
-  console.log(handleEdit, "a")
-
+// const current = new Date();
+// const date= `${current.getDate}/${current.getMonth}/${current.getFullYear}`
   return (
-    <BlogCardContainer  sx={{  borderRadius: '13px' }} >
+    <BlogCardContainer sx={{ borderRadius: '13px' }}>
       <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            R
-          </Avatar>
-        }
-        title={title}
-        subheader={date}
-      />
-      <CardMedia
-        component="img"
-        height="194"
-        image={image}
-        alt={title}
+        // avatar={
+        //   <Avatar sx={{ bgcolor: red[500] }} aria-label="blog">
+        //     {name && name.charAt(0).toUpperCase()}
+        //   </Avatar>
+        // }
+        // title={title}
+      subheader={`Posted by ${username} `}
+     
       />
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-          {category}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {date}
+          Category: {category}
         </Typography>
       </CardContent>
-      <CardActions disableSpacing>
-       
+      <CardMedia component="img" height="194" image={image} alt={title} style={{ maxHeight: '300px', objectFit: 'cover' }} />
+      <CardContent>
+        <Typography variant="h5" component="div">
+          {title}
+        </Typography>
+        <Typography>
+          {date}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+        
 
-        <ExpandMore
-          expand={expanded}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          
-        </ExpandMore>
+
+        </Typography>
+        
+      </CardContent>
+      <CardActions disableSpacing>
+        {showEditButton && (
+          <IconButton aria-label="edit" onClick={handleEdit}>
+            <EditIcon />
+          </IconButton>
+        )}
       </CardActions>
-     
     </BlogCardContainer>
   );
 };

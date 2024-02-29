@@ -6,7 +6,8 @@ import { useState } from "react";
 import { UilEye, UilEyeSlash } from "@iconscout/react-unicons";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "./Firebase1";
-
+import { db } from "./Firebase1";
+import {collection,addDoc} from 'firebase/firestore'
 function Register() {
   const [show, setShow] = useState(false);
   const navi = useNavigate("");
@@ -19,9 +20,14 @@ function Register() {
   });
   const [errormsg, setErrormsg] = useState("");
 
+
+
+  const dbref= collection(db,"AddUser")
+
   const handleShow = () => {
     setShow(!show);
   };
+
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -57,11 +63,15 @@ function Register() {
     setErrormsg("");
 
     createUserWithEmailAndPassword(auth, values.email, values.passwd).then(
+
       async (response) => {
+        localStorage.setItem('user', JSON.stringify(response.user.displayName)); 
+        await addDoc(dbref, { value:values });
         const user = response.user;
         await updateProfile(user, { displayName: values.name });
       }
     );
+    
     navi("/");
   };
 

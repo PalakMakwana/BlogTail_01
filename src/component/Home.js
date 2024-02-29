@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import BlogCard from './Blogcard';
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { auth, db } from "./Firebase1";
-import { signOut } from 'firebase/auth';
+import { collection, getDocs, query, where } from "firebase/firestore";
+import {  db } from "./Firebase1";
+
 import { Link } from 'react-router-dom';
 import { UilArrowLeft } from '@iconscout/react-unicons'
 
@@ -12,43 +12,30 @@ import Nav from './Nav';
 function Home() {
   const [getData, setGetData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4);
+  const [itemsPerPage] = useState(8);
   const [select, setSelect] = useState("");
 
   const navigate = useNavigate();
 
-//   const handleDelete = async (id) => {
-//     const deletedb = doc(db,'AddBlog' ,id);
-//     await deleteDoc(deletedb);
-//   };
+  useEffect(() => {
+    const fetchdata = async () => {
+      let querySnapshot;
+      if (select !== "") {
+        querySnapshot = await getDocs(
+          query(collection(db, "AddBlog"), where("category", "==", select))
+        );
+      } else {
+        querySnapshot = await getDocs(collection(db, "AddBlog"));
+      }
+    
+      const blogs = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
 
-useEffect(() => {
-  const fetchdata = async () => {
-    let querySnapshot;
-    if (select !== "") { // Check if select state is not empty
-      querySnapshot = await getDocs(
-        query(collection(db, "AddBlog"), where("category", "==", select))
-      );
-    } else {
-      querySnapshot = await getDocs(collection(db, "AddBlog"));
-    }
-    const blogs = [];
+      setGetData(blogs);
+    };
 
-    for (const doc of querySnapshot.docs) {
-      const blogData = doc.data();
-      const userDoc = await getDoc(doc.ref);
-      const userName = userDoc.exists() ? userDoc.data().displayName : "Unknown Author";
-      blogs.push({ ...blogData, id: doc.id, author: userName });
-    }
-
-    setGetData(blogs);
-  };
-
-  fetchdata();
-}, [select]);
-
-
+    fetchdata();
+  }, [select]);
 
   useEffect(() => {
     const loged_in = localStorage.getItem("loggedin")
@@ -57,17 +44,16 @@ useEffect(() => {
     }
   },[]);
 
- 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        localStorage.removeItem('loggedin');
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log('Error during logout:', error.message);
-      });
-  };
+  // const handleLogout = () => {
+  //   signOut(auth)
+  //     .then(() => {
+  //       localStorage.removeItem('loggedin');
+  //       navigate('/');
+  //     })
+  //     .catch((error) => {
+  //       console.log('Error during logout:', error.message);
+  //     });
+  // };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -115,25 +101,18 @@ useEffect(() => {
         <div className="grid grid-cols-4 mt-10 grid-row-2 gap-2">
         {currentItems.map((values, index) => (
           <div className="ml-0 mb-96" key={values.id} >
-            {/* <Link to={`/blog/${values.id}`}> */}
             <Link to={`/blog/${values.id}`}>
-            <BlogCard
-              className=""
-              index={index + 1}
-              category={values.category}
-              title={values.title}
-              author={values.author}
-              date={values.date}
-              image={values.image}
-              showDeleteButton={false}
-            //   handleDelete={() => handleDelete(values.id)}
-            />
-            {/* </Link> */}
-            {/* <p>
-              {values.uid && getUserDisplayName(values.Uid)}
-            </p> */}
-             </Link>
-             
+              <BlogCard
+                className=""
+                index={index + 1}
+                username={values.username}
+                category={values.category}
+                title={values.title}
+                date={values.date}
+                image={values.image}
+                showDeleteButton={false}
+              />
+            </Link>
           </div>
         ))}
       </div>
@@ -146,11 +125,6 @@ useEffect(() => {
     
     </>
   );
-
-  // async function getUserDisplayName(uid){
-  //   const userDoc = await getDoc(doc(db,'users',uid));
-  //   return userDoc.exists() ? userDoc.data().displayName : " unknown Author"
-  // }
 }
 
 export default Home;
