@@ -4,13 +4,18 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, db } from "./Firebase1";
 import { v4 } from "uuid";
 import { imagedb } from "./Firebase1";
+import toast from "react-hot-toast";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
 function MegamenuWithoutNavbar({ postId, values, handleClose }) {
   const [imageUrl, setImageUrl] = useState("");
+  const [quill, setQuill] = useState('');
   const [value, setValue] = useState({
     category: "",
     title: "",
-    date: "",
+    date: new Date().toISOString().slice(0, 10),
     description: "",
   });
   const navigate = useNavigate();
@@ -20,49 +25,54 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
       setValue({
         category: values.category || "",
         title: values.title || "",
-        date: values.date || "",
+        date: new Date().toISOString().slice(0, 10),
         description: values.description || "",
       });
+      setQuill(values.description || "");
+
+      
+      setImageUrl(values.image || "");
     }
   }, [values]);
 
   const addblog = async (e) => {
     e.preventDefault();
-    if (!imageUrl) {
-      alert("Please upload an image");
-      return;
-    }
-  
+
     try {
       const user = auth.currentUser;
       if (user) {
-        const data = {
+        let data = {
           category: value.category,
           title: value.title,
           date: value.date,
-          image: imageUrl,
-          description: value.description,
+          description: quill,
           uid: user.uid,
         };
-  
+
+        
+        if (imageUrl !== "") {
+          data = { ...data, image: imageUrl };
+        }
+
         if (postId) {
+          
           await updateDoc(doc(db, "AddBlog", postId), data);
-          alert("Blog post updated successfully");
+          toast.success("Blog Updated");
         } else {
+        
           const docRef = await addDoc(collection(db, "AddBlog"), data);
           console.log("Document written with ID:", docRef.id);
-          alert("Blog post added successfully");
+          toast.success("Blog Created");
         }
-  
+
         navigate("/dashboard");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to save changes");
+      toast.error("Failed to save changes");
     }
   };
-  
-  
+
   const handleuploadImage = (e) => {
     const file = e.target.files[0];
 
@@ -76,7 +86,6 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
       });
     }
   };
-
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-3">
       <div className="mt-0">
@@ -120,7 +129,7 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="date" className="text-xl text-gray-900">
                 Date
@@ -136,7 +145,7 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
                 }
               />
             </div>
-          </div>
+          </div> */}
           <div>
             <label htmlFor="image" className="text-xl text-gray-900">
               Upload Image
@@ -147,7 +156,11 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
               type="file"
               className="input-field border ml-8 w-52  border-gray-300 rounded-md p-2"
               onChange={handleuploadImage}
+              
             />
+             {imageUrl && (
+    <img src={imageUrl} alt="Preview" className="mt-2 max-w-52" />
+  )}
           </div>
 
           <div>
@@ -155,7 +168,14 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
               Add Description
             </label>
           </div>
-          <div>
+          <ReactQuill
+  theme="snow"
+  value={quill}
+  onChange={(content) => setQuill(content)}
+/>
+
+          {/* <ReactQuill theme="snow" value={quill} onChange={setQuill} /> */}
+          {/* <div>
             <textarea
               id="description"
               name="description"
@@ -167,9 +187,9 @@ function MegamenuWithoutNavbar({ postId, values, handleClose }) {
                 setValue({ ...value, description: e.target.value })
               }
             ></textarea>
-          </div>
-          <button type="submit" className="text-white bg-gray-800 ml-96 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Save Changes</button>
-          <button className="text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2" onClick={handleClose}>Cancel</button>
+          </div> */}
+          <button type="submit" className="text-white bg-gray-800  hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Save Changes</button>
+          <button className="text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2" onClick={handleClose}>Close</button>
         </form>
       </div>
     </div>
